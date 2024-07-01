@@ -20,6 +20,9 @@ public class XCoordinates extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        int pluginId = 22479;
+        Metrics metrics = new Metrics(this, pluginId);
+
         sendConsoleMessage(ChatColor.GREEN + "XCoordinates has been enabled!");
         this.getCommand("xcoordinates").setExecutor(new CommandXCoordinates(this));
         new CoordinateDisplayTask().runTaskTimer(this, 0, 1);
