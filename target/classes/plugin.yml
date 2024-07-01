@@ -1,15 +1,19 @@
 name: XCoordinates
-version: 1.0.1
+version: 1.0.2
 main: org.coleski123.xcoordinates.XCoordinates
 api-version: '1.21'
-description: Show your coordinates above your hotbar
+description: Show your coordinates above your hotbar.
 author: Coleski123
 website: https://discord.gg/aQz5sk6CMN
 commands:
   xcoordinates:
     description: Toggle coordinates display
-    usage: /<command> <enable|disable>
+    usage: /<command> <enable|disable|global> [enable|disable]
+    aliases: [coords, coordinates]
 permissions:
   xcoordinates.use:
     description: Allows the player to use the /xcoordinates command.
+    default: op
+  xcoordinates.use.global:
+    description: Allows the player to use the /xcoordinates global command.
     default: op

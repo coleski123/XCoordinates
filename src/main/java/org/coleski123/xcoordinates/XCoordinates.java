@@ -5,18 +5,24 @@ import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.UUID;
 
 public class XCoordinates extends JavaPlugin {
 
     private final HashMap<UUID, Boolean> playerCoordinatesEnabled = new HashMap<>();
-
     private String pluginPrefix = ChatColor.GOLD + "[XCoordinates]";
+    private File playerDataFile;
+    private FileConfiguration playerDataConfig;
+    private boolean globalCoordinatesEnabled;
 
     @Override
     public void onEnable() {
@@ -24,7 +30,9 @@ public class XCoordinates extends JavaPlugin {
         Metrics metrics = new Metrics(this, pluginId);
 
         sendConsoleMessage(ChatColor.GREEN + "XCoordinates has been enabled!");
-        this.getCommand("xcoordinates").setExecutor(new CommandXCoordinates(this));
+        CommandXCoordinates commandExecutor = new CommandXCoordinates(this);
+        this.getCommand("xcoordinates").setExecutor(commandExecutor);
+        this.getCommand("xcoordinates").setTabCompleter(commandExecutor);
         new CoordinateDisplayTask().runTaskTimer(this, 0, 1);
 
         new UpdateChecker(this, 117734).getVersion(version -> {
@@ -34,19 +42,74 @@ public class XCoordinates extends JavaPlugin {
                 sendConsoleMessage("&cA new version is now available! Download: https://www.spigotmc.org/resources/xcoordinates.117734/");
             }
         });
+
+        // Load player data
+        loadPlayerData();
     }
 
     @Override
     public void onDisable() {
         sendConsoleMessage(ChatColor.RED + "XCoordinates has been disabled!");
+
+        // Save player data
+        savePlayerData();
     }
 
     public boolean isCoordinatesEnabled(Player player) {
-        return playerCoordinatesEnabled.getOrDefault(player.getUniqueId(), false);
+        return globalCoordinatesEnabled || playerCoordinatesEnabled.getOrDefault(player.getUniqueId(), false);
     }
 
     public void setCoordinatesEnabled(Player player, boolean enabled) {
         playerCoordinatesEnabled.put(player.getUniqueId(), enabled);
+        playerDataConfig.set(player.getUniqueId().toString(), enabled);
+        savePlayerData();
+    }
+
+    public boolean isGlobalCoordinatesEnabled() {
+        return globalCoordinatesEnabled;
+    }
+
+    public void setGlobalCoordinatesEnabled(boolean enabled) {
+        globalCoordinatesEnabled = enabled;
+        playerDataConfig.set("globalCoordinatesEnabled", enabled);
+        savePlayerData();
+
+        // Update individual players' coordinates based on global state
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (enabled) {
+                setCoordinatesEnabled(player, true);
+            } else {
+                setCoordinatesEnabled(player, false);
+            }
+        }
+    }
+
+    private void loadPlayerData() {
+        playerDataFile = new File(getDataFolder(), "playerdata.yml");
+        if (!playerDataFile.exists()) {
+            playerDataFile.getParentFile().mkdirs();
+            try {
+                playerDataFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        playerDataConfig = YamlConfiguration.loadConfiguration(playerDataFile);
+        globalCoordinatesEnabled = playerDataConfig.getBoolean("globalCoordinatesEnabled", false);
+        for (String key : playerDataConfig.getKeys(false)) {
+            if (key.equals("globalCoordinatesEnabled")) continue;
+            UUID playerUUID = UUID.fromString(key);
+            boolean enabled = playerDataConfig.getBoolean(key);
+            playerCoordinatesEnabled.put(playerUUID, enabled);
+        }
+    }
+
+    private void savePlayerData() {
+        try {
+            playerDataConfig.save(playerDataFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private class CoordinateDisplayTask extends BukkitRunnable {
@@ -96,5 +159,4 @@ public class XCoordinates extends JavaPlugin {
     private void sendConsoleMessage(String message) {
         getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', pluginPrefix + " " + message));
     }
-
 }
