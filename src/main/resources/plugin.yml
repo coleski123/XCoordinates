@@ -1,5 +1,5 @@
 name: XCoordinates
-version: 0.1
+version: 1.0
 main: org.coleski123.xcoordinates.XCoordinates
 api-version: '1.21'
 description: Show your coordinates above your hotbar

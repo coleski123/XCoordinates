@@ -6,7 +6,7 @@
 
     <groupId>org.coleski123</groupId>
     <artifactId>XCoordinates</artifactId>
-    <version>0.1</version>
+    <version>1.0</version>
     <packaging>jar</packaging>
 
     <name>XCoordinates</name>
