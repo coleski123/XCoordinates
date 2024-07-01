@@ -16,15 +16,26 @@ public class XCoordinates extends JavaPlugin {
 
     private final HashMap<UUID, Boolean> playerCoordinatesEnabled = new HashMap<>();
 
+    private String pluginPrefix = ChatColor.GOLD + "[XCoordinates]";
+
     @Override
     public void onEnable() {
+        sendConsoleMessage(ChatColor.GREEN + "XCoordinates has been enabled!");
         this.getCommand("xcoordinates").setExecutor(new CommandXCoordinates(this));
         new CoordinateDisplayTask().runTaskTimer(this, 0, 1);
+
+//        new UpdateChecker(this, 113264).getVersion(version -> {
+//            if (this.getDescription().getVersion().equals(version)) {
+//                sendConsoleMessage("&2No new versions available.");
+//            } else {
+//                sendConsoleMessage("&cA new version is now available! Download: CHANGE ME");
+//            }
+//        });
     }
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
+        sendConsoleMessage(ChatColor.RED + "XCoordinates has been disabled!");
     }
 
     public boolean isCoordinatesEnabled(Player player) {
@@ -78,4 +89,9 @@ public class XCoordinates extends JavaPlugin {
             };
         }
     }
+
+    private void sendConsoleMessage(String message) {
+        getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', pluginPrefix + " " + message));
+    }
+
 }
