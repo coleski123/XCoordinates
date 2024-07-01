@@ -27,13 +27,13 @@ public class XCoordinates extends JavaPlugin {
         this.getCommand("xcoordinates").setExecutor(new CommandXCoordinates(this));
         new CoordinateDisplayTask().runTaskTimer(this, 0, 1);
 
-//        new UpdateChecker(this, 113264).getVersion(version -> {
-//            if (this.getDescription().getVersion().equals(version)) {
-//                sendConsoleMessage("&2No new versions available.");
-//            } else {
-//                sendConsoleMessage("&cA new version is now available! Download: CHANGE ME");
-//            }
-//        });
+        new UpdateChecker(this, 117734).getVersion(version -> {
+            if (this.getDescription().getVersion().equals(version)) {
+                sendConsoleMessage("&2No new versions available.");
+            } else {
+                sendConsoleMessage("&cA new version is now available! Download: https://www.spigotmc.org/resources/xcoordinates.117734/");
+            }
+        });
     }
 
     @Override
