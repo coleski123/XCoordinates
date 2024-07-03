@@ -1,6 +1,5 @@
 package org.coleski123.xcoordinates;
 
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -13,54 +12,55 @@ import java.util.List;
 public class CommandXCoordinates implements CommandExecutor, TabCompleter {
 
     private final XCoordinates plugin;
+    private ChatMessages chatMessages;
 
     public CommandXCoordinates(XCoordinates plugin) {
         this.plugin = plugin;
+        chatMessages = new ChatMessages(plugin);
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage(ChatColor.RED + "This command can only be used by players!");
+            chatMessages.plyOnlyMessage(sender);
             return true;
         }
 
-        String prefix = ChatColor.GOLD + "[XCoordinates]" + " ";
         Player player = (Player) sender;
 
         // Check if the player has the required permission
         if (!player.hasPermission("xcoordinates.use")) {
-            player.sendMessage(ChatColor.RED + "You do not have permission to use this command!");
+            chatMessages.noPermMessage(player, sender);
             return true;
         }
 
         if (args.length < 1 || args.length > 2) {
-            player.sendMessage(ChatColor.RED + "Usage: /xcoordinates <enable|disable|global> [enable|disable]");
+            chatMessages.cmdUsageMessage(player, sender);
             return true;
         }
 
         if (args[0].equalsIgnoreCase("enable")) {
             if (plugin.isGlobalCoordinatesEnabled()) {
-                player.sendMessage(prefix + ChatColor.RED + "Cannot enable coordinates because global coordinates are enabled.");
+                chatMessages.globalCoordsEnableFailMessage(player, sender);
                 return true;
             }
             plugin.setCoordinatesEnabled(player, true);
-            player.sendMessage(prefix + ChatColor.GREEN + "Coordinates have been enabled.");
+            chatMessages.coordsEnabledMessage(player, sender);
         } else if (args[0].equalsIgnoreCase("disable")) {
             if (plugin.isGlobalCoordinatesEnabled()) {
-                player.sendMessage(prefix + ChatColor.RED + "Cannot disable coordinates because global coordinates are enabled.");
+                chatMessages.globalCordsDisableFailMessage(player, sender);
                 return true;
             }
             plugin.setCoordinatesEnabled(player, false);
-            player.sendMessage(prefix + ChatColor.RED + "Coordinates have been disabled.");
+            chatMessages.coordsDisabledMessage(player, sender);
         } else if (args[0].equalsIgnoreCase("global")) {
             if (!player.hasPermission("xcoordinates.use.global")) {
-                player.sendMessage(ChatColor.RED + "You do not have permission to use the global command!");
+                chatMessages.globalCoordsPermFail(player, sender);
                 return true;
             }
 
             if (args.length != 2) {
-                player.sendMessage(prefix + ChatColor.RED + "Usage: /xcoordinates global <enable|disable>");
+                chatMessages.globalCoordsUsageMessage(player, sender);
                 return true;
             }
 
@@ -69,18 +69,18 @@ public class CommandXCoordinates implements CommandExecutor, TabCompleter {
                 for (Player p : plugin.getServer().getOnlinePlayers()) {
                     plugin.setCoordinatesEnabled(p, true);
                 }
-                player.sendMessage(prefix + ChatColor.GREEN + "Global coordinates have been enabled.");
+                chatMessages.globalCoordsEnabledMessage(player, sender);
             } else if (args[1].equalsIgnoreCase("disable")) {
                 plugin.setGlobalCoordinatesEnabled(false);
                 for (Player p : plugin.getServer().getOnlinePlayers()) {
                     plugin.setCoordinatesEnabled(p, false);
                 }
-                player.sendMessage(prefix + ChatColor.RED + "Global coordinates have been disabled.");
+                chatMessages.globalCoordsDisabledMessage(player, sender);
             } else {
-                player.sendMessage(prefix + ChatColor.RED + "Usage: /xcoordinates global <enable|disable>");
+                chatMessages.globalCoordsUsageMessage(player, sender);
             }
         } else {
-            player.sendMessage(prefix + ChatColor.RED + "Usage: /xcoordinates <enable|disable|global> [enable|disable]");
+            chatMessages.mainCmdFailMessage(player, sender);
         }
 
         return true;
